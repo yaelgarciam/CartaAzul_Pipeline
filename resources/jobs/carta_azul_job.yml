@@ -1,0 +1,25 @@
+# API-shaped JobSettings; this file alone does not deploy a job.
+# Convert YAML to JSON for POST /api/2.2/jobs/create.
+# For POST /api/2.2/jobs/reset wrap it as {job_id: <id>, new_settings: <this mapping>}.
+# Existing pipeline identifier is fixed below. Source path
+# mapping is defined by resources/pipelines/carta_azul_pipeline.yml.
+# Run manually with the Jobs UI or POST /api/2.2/jobs/run-now; no daily schedule.
+name: carta_azul_historical_job
+description: Reproducible historical Applebee's pipeline with Silver, Gold and quality checks; exploratory indicators for authorized review.
+format: MULTI_TASK
+max_concurrent_runs: 1
+timeout_seconds: 14400
+queue:
+  enabled: true
+tasks:
+  - task_key: historical_pipeline
+    description: Refresh the complete configured historical pipeline and its structural quality invariants.
+    pipeline_task:
+      pipeline_id: 869fc958-69e2-4f3b-ae58-616b27696816
+      # Refresh current materialized-view definitions without resetting tables.
+      # This setting does not promise an incremental refresh or avoid JSON reads.
+      full_refresh: false
+    max_retries: 1
+    min_retry_interval_millis: 60000
+    retry_on_timeout: false
+    timeout_seconds: 14400

@@ -1,0 +1,50 @@
+# API-shaped pipeline specification; this file alone does not deploy resources.
+# Convert YAML to JSON for POST /api/2.0/pipelines (create) or
+# PUT /api/2.0/pipelines/{pipeline_id} (update).
+# Map the repository root to a private Databricks Workspace Files folder and
+# this workspace uses /Workspace/Users/a01352461@tec.mx/CartaAzul.
+# Helpers _common.py and _schemas.py must also be uploaded under silver/.
+# root_path makes the silver package importable; only entry points are libraries.
+# Manual historical batch: no schedule, no continuous ingestion.
+name: carta_azul_historical_pipeline
+catalog: workspace
+schema: applebees
+serverless: true
+edition: ADVANCED
+channel: current
+continuous: false
+development: false
+root_path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations
+libraries:
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/silver/mv_checks.py
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/silver/mv_reference_dimensions.py
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/silver/mv_payments.py
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/silver/mv_discounts.py
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/silver/mv_quality_issues.py
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/gold/mv_check_features.sql
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/gold/mv_discount_daily.sql
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/gold/mv_review_cases.sql
+  - file:
+      path: /Workspace/Users/a01352461@tec.mx/CartaAzul/src/transformations/gold/mv_pipeline_quality.sql
+configuration:
+  carta_azul.source_root: /Volumes/workspace/applebees/raw_files/data/Dataset
+  carta_azul.brand: rmh
+  carta_azul.table_prefix: ""
+  carta_azul.start_date: "2026-04-28"
+  carta_azul.end_date: "2026-08-20"
+  carta_azul.expected_start_date: "2026-04-28"
+  carta_azul.expected_end_date: "2026-08-20"
+  carta_azul.expected_source_files: "115"
+  carta_azul.reconciliation_tolerance: "0.05"
+  # Exploratory defaults for sensitivity review; no official benefit policy.
+  carta_azul.review_percentile: "0.99"
+  carta_azul.review_min_cohort: "50"
+  carta_azul.rule_version: v1_exploratory
